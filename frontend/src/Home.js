@@ -5,11 +5,40 @@ import axios from 'axios';
 
 export default function Home() {
   const checkoutHandler = async (amount) => {
-    const { data } = await axios.post('http://localhost:4000/api/checkout', {
+    const {
+      data: { key },
+    } = await axios.get('http://localhost:4000/api/getkey');
+
+    const {
+      data: { order },
+    } = await axios.post('http://localhost:4000/api/checkout', {
       amount,
     });
 
-    console.log(data);
+    const options = {
+      key, // Enter the Key ID generated from the Dashboard
+      amount: order.amount,
+      currency: 'INR',
+      name: 'Mr. White', //your business name
+      description: 'Test Transaction',
+      image:
+        'https://upload.wikimedia.org/wikipedia/en/thumb/0/03/Walter_White_S5B.png/220px-Walter_White_S5B.png',
+      order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+      callback_url: 'http://localhost:4000/api/paymentverification',
+      prefill: {
+        name: 'Gaurav Kumar', //your customer's name
+        email: 'gaurav.kumar@example.com',
+        contact: '9000090000',
+      },
+      notes: {
+        address: 'Razorpay Corporate Office',
+      },
+      theme: {
+        color: '#121212',
+      },
+    };
+    const razor = new window.Razorpay(options);
+    razor.open();
   };
   return (
     <Box>
